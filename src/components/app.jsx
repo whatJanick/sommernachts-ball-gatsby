@@ -100,12 +100,12 @@ const App = (props) => {
         <React.Fragment>
           {/*<Three show={isIntro || mobileNavOpen} />*/}
           <header
-            className={`text-logo front 
+            className={`text-logo front
           ${(!isIntro && !isMobile) || mobileNavOpen ? "show" : "hide"}`}
           >
             <div className="row">
               <span className="left suffix-slash">Sommer</span>
-              <span className="right">21.</span>
+              <span className="right">20.</span>
             </div>
             <div className="row">
               <span className="left suffix-slash">Nachts</span>
@@ -113,7 +113,7 @@ const App = (props) => {
             </div>
             <div className="row">
               <span className="left suffix-slash">Ball</span>
-              <span className="right">2025</span>
+              <span className="right">2026</span>
             </div>
             <div className="row instagram-link">
               <a
@@ -185,11 +185,11 @@ const App = (props) => {
                     <br />
                     8005 Zürich
                     <br />
-                    <a href="mailto:patrick.mueller@gmz.migros.ch">
-                      patrick.mueller@gmz.migros.ch
+                    <a href="mailto:sommer­nachts­ball@gmz.migros.ch">
+                      sommer­nachts­ball@gmz.migros.ch
                     </a>
                     <br />
-                    <a href="tel:+41585615303">+41 58 561 53 03</a>
+                    <a href="tel:+41585615460">+41 58 561 54 60</a>
                     <br />
                   </p>
                 </div>
