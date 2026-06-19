@@ -14,7 +14,7 @@ import Classnames from "classnames"
 import "../styles/main.scss"
 
 import alzheimberSrcB from "../assets/alzheimer_b.svg"
-import tanzwerkSrcB from "../assets/tanzwerk_b.png"
+import tanzwerkSrcB from "../assets/TW101.png"
 import shopvilleSrcB from "../assets/shopville_b.svg"
 import radio1SrcB from "../assets/radio1_b.svg"
 import srkB from "../assets/srk_b.svg"
