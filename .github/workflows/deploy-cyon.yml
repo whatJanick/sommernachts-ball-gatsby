@@ -56,7 +56,24 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Bauen
-        run: yarn build
+        # Die WordPress-Instanzen auf cyon antworten Runner-IPs sporadisch
+        # mit HTTP 415, was den Build in createSchemaCustomization abbricht.
+        # Deshalb bis zu drei Anlaeufe mit Pause dazwischen.
+        run: |
+          for versuch in 1 2 3; do
+            echo "--- Build-Versuch $versuch ---"
+            if yarn build; then
+              echo "Build im Versuch $versuch erfolgreich"
+              exit 0
+            fi
+            if [ "$versuch" -lt 3 ]; then
+              echo "Fehlgeschlagen, warte 45 Sekunden..."
+              sleep 45
+              yarn clean || true
+            fi
+          done
+          echo "::error::Build nach drei Versuchen fehlgeschlagen"
+          exit 1
 
       - name: Build pruefen
         run: |
