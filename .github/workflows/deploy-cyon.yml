@@ -58,21 +58,23 @@ jobs:
       - name: Bauen
         # Die WordPress-Instanzen auf cyon antworten Runner-IPs sporadisch
         # mit HTTP 415, was den Build in createSchemaCustomization abbricht.
-        # Deshalb bis zu drei Anlaeufe mit Pause dazwischen.
+        # Deshalb bis zu fuenf Anlaeufe mit Pause dazwischen. Bleibt ein
+        # Jahrgang haengen, hilft ein erneuter Lauf - der landet auf einem
+        # anderen Runner. Dauerhafte Loesung waere eine Abklaerung bei cyon.
         run: |
-          for versuch in 1 2 3; do
+          for versuch in 1 2 3 4 5; do
             echo "--- Build-Versuch $versuch ---"
             if yarn build; then
               echo "Build im Versuch $versuch erfolgreich"
               exit 0
             fi
-            if [ "$versuch" -lt 3 ]; then
-              echo "Fehlgeschlagen, warte 45 Sekunden..."
-              sleep 45
+            if [ "$versuch" -lt 5 ]; then
+              echo "Fehlgeschlagen, warte 90 Sekunden..."
+              sleep 90
               yarn clean || true
             fi
           done
-          echo "::error::Build nach drei Versuchen fehlgeschlagen"
+          echo "::error::Build nach fuenf Versuchen fehlgeschlagen"
           exit 1
 
       - name: Build pruefen
