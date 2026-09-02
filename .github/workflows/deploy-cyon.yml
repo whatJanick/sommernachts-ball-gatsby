@@ -1,0 +1,85 @@
+name: Build & Deploy Jahrgaenge nach cyon
+
+# Baut jeden Jahrgang aus seinem legacy-Branch und legt das Ergebnis
+# im zugehoerigen Ordner auf dem cyon-Webhosting ab.
+#
+# Die Node-Version ist pro Jahrgang festgelegt, weil die aelteren Branches
+# auf Gatsby 2 bzw. 4 laufen und deren sharp-Version nur zu bestimmten
+# Node-Versionen passende Fertigbinaries hat.
+
+on:
+  push:
+    branches: [ci/deploy]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cyon
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - jahr: "2020"
+            node: "14"
+          - jahr: "2021"
+            node: "16"
+          - jahr: "2022"
+            node: "18"
+          - jahr: "2023"
+            node: "18"
+          - jahr: "2024"
+            node: "20"
+          - jahr: "2025"
+            node: "20"
+
+    name: ${{ matrix.jahr }} (Node ${{ matrix.node }})
+
+    steps:
+      - name: Jahrgang auschecken
+        uses: actions/checkout@v4
+        with:
+          ref: legacy-${{ matrix.jahr }}
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Abhaengigkeiten installieren
+        run: npx --yes yarn@1.22.22 install --frozen-lockfile
+
+      - name: Bauen
+        run: npx --yes yarn@1.22.22 build
+
+      - name: Build pruefen
+        run: |
+          if [ ! -s public/index.html ]; then
+            echo "::error::public/index.html fehlt oder ist leer - Deploy wird abgebrochen"
+            exit 1
+          fi
+          echo "Seiten im Build: $(find public -name '*.html' | wc -l)"
+
+      - name: SSH-Zugang vorbereiten
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CYON_SSH_KEY }}" > ~/.ssh/cyon
+          chmod 600 ~/.ssh/cyon
+          ssh-keyscan -t ed25519,rsa s080.cyon.net >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Nach cyon uebertragen
+        run: |
+          rsync -az --delete \
+            --exclude='.htaccess' \
+            --exclude='cgi-bin' \
+            -e "ssh -i ~/.ssh/cyon -o IdentitiesOnly=yes" \
+            public/ \
+            sommern2@s080.cyon.net:~/public_html/${{ matrix.jahr }}/
+
+      - name: Ergebnis pruefen
+        run: |
+          ssh -i ~/.ssh/cyon -o IdentitiesOnly=yes sommern2@s080.cyon.net \
+            "test -s ~/public_html/${{ matrix.jahr }}/index.html && echo 'index.html liegt auf dem Server'"
