@@ -21,6 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      # Nicht alle Jahrgaenge gleichzeitig, sonst drosselt cyon die
+      # parallelen GraphQL-Abfragen der WordPress-Instanzen.
+      max-parallel: 2
       matrix:
         include:
           - jahr: "2020"
@@ -50,10 +53,10 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Abhaengigkeiten installieren
-        run: npx --yes yarn@1.22.22 install --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       - name: Bauen
-        run: npx --yes yarn@1.22.22 build
+        run: yarn build
 
       - name: Build pruefen
         run: |
